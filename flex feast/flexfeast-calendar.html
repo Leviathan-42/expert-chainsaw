@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Calendar - FlexFeast</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        nav {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #667eea;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6rem 0 2rem;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .calendar-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .calendar-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .month-nav button {
+            background: none;
+            border: 2px solid #667eea;
+            color: #667eea;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .month-nav button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .month-year {
+            font-weight: 600;
+            color: #333;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e9ecef;
+            margin: 1.5rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .calendar-header {
+            background: #667eea;
+            color: white;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day {
+            background: white;
+            min-height: 80px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .calendar-day:hover {
+            background: #f8f9ff;
+        }
+
+        .calendar-day.other-month {
+            color: #ccc;
+            background: #f8f9fa;
+        }
+
+        .calendar-day.delivery-day {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .calendar-day.delivery-day:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6b4190 100%);
+        }
+
+        .calendar-day.selected {
+            background: #28a745;
+            color: white;
+        }
+
+        .calendar-day.unavailable {
+            background: #e9ecef;
+            color: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        .day-number {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .delivery-indicator {
+            font-size: 0.7rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.2rem 0.4rem;
+            border-radius: 10px;
+            margin-top: 0.2rem;
+        }
+
+        .delivery-day .delivery-indicator {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .delivery-summary {
+            padding: 1.5rem;
+        }
+
+        .frequency-options {
+            margin: 1rem 0;
+        }
+
+        .frequency-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .frequency-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .frequency-option.active {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .frequency-option input[type="radio"] {
+            accent-color: #667eea;
+        }
+
+        .frequency-details {
+            margin-left: 1.5rem;
+        }
+
+        .frequency-title {
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .frequency-desc {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .next-deliveries {
+            margin: 1.5rem 0;
+        }
+
+        .delivery-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .delivery-item:last-child {
+            border-bottom: none;
+        }
+
+        .delivery-date {
+            font-weight: 600;
+        }
+
+        .delivery-status {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .delivery-status.confirmed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .delivery-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .calendar-controls {
+            margin: 1.5rem 0;
+        }
+
+        .control-btn {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .control-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .control-btn.primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .legend {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .legend-delivery {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .legend-selected {
+            background: #28a745;
+        }
+
+        .legend-unavailable {
+            background: #e9ecef;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-grid {
+                margin: 1rem;
+            }
+            
+            .calendar-day {
+                min-height: 60px;
+                padding: 0.3rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+
+            .legend {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">FlexFeast</div>
+            <ul class="nav-links">
+                <li><a href="flexfeast-home.html">Home</a></li>
+                <li><a href="flexfeast-plans.html">Plans</a></li>
+                <li><a href="flexfeast-customize.html">Customize</a></li>
+                <li><a href="flexfeast-calendar.html" class="active">Calendar</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="header">
+        <div class="container">
+            <h1>Manage Your Deliveries</h1>
+            <p>Choose delivery dates that work for your schedule</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="calendar-dashboard">
+            <div class="calendar-section">
+                <div class="section-header">
+                    <h2 class="section-title">Delivery Calendar</h2>
+                    <div class="month-nav">
+                        <button onclick="changeMonth(-1)">‹</button>
+                        <div class="month-year" id="monthYear">January 2025</div>
+                        <button onclick="changeMonth(1)">›</button>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color legend-delivery"></div>
+                        <span>Scheduled Delivery</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-selected"></div>
+                        <span>Custom Date</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color legend-unavailable"></div>
+                        <span>Unavailable</span>
+                    </div>
+                </div>
+
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Calendar will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="delivery-summary">
+                    <h3 class="section-title">Delivery Settings</h3>
+                    
+                    <div class="frequency-options">
+                        <h4 style="margin-bottom: 1rem;">Delivery Frequency</h4>
+                        <label class="frequency-option active">
+                            <input type="radio" name="frequency" value="weekly" checked>
+                            <div class="frequency-details">
+                                <div class="frequency-title">Weekly</div>
+                                <div class="frequency-desc">Every Monday</div>
+                            </div>
+                        </label>
+                        <label class="frequency-option">
+                            <input type="radio" name="frequency" value="biweekly">
+                            <div class="frequency-details">
+                                <div class="frequency-title">Bi-weekly</div>
+                                <div class="frequency-desc">Every other Monday</div>
+                            </div>
+                        </label>
+                        <label class="frequency-option">
+                            <input type="radio" name="frequency" value="monthly">
+                            <div class="frequency-details">
+                                <div class="frequency-title">Monthly</div>
+                                <div class="frequency-desc">First Monday of month</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="next-deliveries">
+                        <h4 style="margin-bottom: 1rem;">Upcoming Deliveries</h4>
+                        <div id="upcomingDeliveries">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="calendar-controls">
+                        <button class="control-btn" onclick="skipNext()">Skip Next Delivery</button>
+                        <button class="control-btn" onclick="pauseSubscription()">Pause Subscription</button>
+                        <button class="control-btn primary" onclick="saveDeliverySettings()">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedFrequency = 'weekly';
+        let customDates = new Set();
+        let skippedDates = new Set();
+
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        function initializeCalendar() {
+            renderCalendar();
+            updateUpcomingDeliveries();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('input[name="frequency"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    document.querySelectorAll('.frequency-option').forEach(opt => opt.classList.remove('active'));
+                    e.target.closest('.frequency-option').classList.add('active');
+                    selectedFrequency = e.target.value;
+                    renderCalendar();
+                    updateUpcomingDeliveries();
+                });
+            });
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('monthYear').textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const firstDayOfWeek = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+
+            // Add day headers
+            dayNames.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+
+            // Add empty cells for days before first day of month
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day other-month';
+                const prevMonth = new Date(year, month, -i);
+                emptyDay.innerHTML = `<div class="day-number">${prevMonth.getDate()}</div>`;
+                calendarGrid.appendChild(emptyDay);
+            }
+
+            // Add days of current month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                const dayDate = new Date(year, month, day);
+                const isDeliveryDay = isScheduledDeliveryDay(dayDate);
+                const isCustomDate = customDates.has(formatDate(dayDate));
+                const isSkipped = skippedDates.has(formatDate(dayDate));
+                const isPast = dayDate < new Date().setHours(0, 0, 0, 0);
+
+                let className = 'calendar-day';
+                if (isPast) {
+                    className += ' unavailable';
+                } else if (isCustomDate) {
+                    className += ' selected';
+                } else if (isDeliveryDay && !isSkipped) {
+                    className += ' delivery-day';
+                }
+
+                dayElement.className = className;
+                dayElement.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    ${isDeliveryDay && !isSkipped ? '<div class="delivery-indicator">Delivery</div>' : ''}
+                    ${isCustomDate ? '<div class="delivery-indicator">Custom</div>' : ''}
+                    ${isSkipped ? '<div class="delivery-indicator">Skipped</div>' : ''}
+                `;
+
+                if (!isPast) {
+                    dayElement.addEventListener('click', () => toggleCustomDate(dayDate));
+                }
+
+                calendarGrid.appendChild(dayElement);
+            }
+
+            // Add empty cells for days after last day of month
+            const totalCells = calendarGrid.children.length - 7; // Subtract header row
+            const remainingCells = 42 - totalCells - 7; // 6 weeks * 7 days - headers
+            for (let i = 1; i <= remainingCells && totalCells + i <= 35; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day other-month';
+                emptyDay.innerHTML = `<div class="day-number">${i}</div>`;
+                calendarGrid.appendChild(emptyDay);
+            }
+        }
+
+        function isScheduledDeliveryDay(date) {
+            const dayOfWeek = date.getDay();
+            const dayOfMonth = date.getDate();
+            
+            switch (selectedFrequency) {
+                case 'weekly':
+                    return dayOfWeek === 1; // Monday
+                case 'biweekly':
+                    // Every other Monday starting from a reference date
+                    const referenceDate = new Date(2025, 0, 6); // First Monday of 2025
+                    const daysDiff = Math.floor((date - referenceDate) / (1000 * 60 * 60 * 24));
+                    return dayOfWeek === 1 && daysDiff % 14 === 0;
+                case 'monthly':
+                    // First Monday of each month
+                    const firstMonday = getFirstMondayOfMonth(date);
+                    return date.getDate() === firstMonday.getDate();
+                default:
+                    return false;
+            }
+        }
+
+        function getFirstMondayOfMonth(date) {
+            const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+            const firstDayOfWeek = firstDay.getDay();
+            const daysToMonday = firstDayOfWeek === 0 ? 1 : 8 - firstDayOfWeek;
+            return new Date(date.getFullYear(), date.getMonth(), daysToMonday);
+        }
+
+        function toggleCustomDate(date) {
+            const dateStr = formatDate(date);
+            if (customDates.has(dateStr)) {
+                customDates.delete(dateStr);
+            } else {
+                customDates.add(dateStr);
+            }
+            renderCalendar();
+            updateUpcomingDeliveries();
+        }
+
+        function formatDate(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function updateUpcomingDeliveries() {
+            const container = document.getElementById('upcomingDeliveries');
+            const deliveries = getUpcomingDeliveries();
+            
+            if (deliveries.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #6c757d; font-style: italic;">No upcoming deliveries scheduled</div>';
+                return;
+            }
+
+            container.innerHTML = deliveries.map(delivery => `
+                <div class="delivery-item">
+                    <div>
+                        <div class="delivery-date">${delivery.date}</div>
+                        <div style="font-size: 0.8rem; color: #6c757d;">${delivery.type}</div>
+                    </div>
+                    <div class="delivery-status ${delivery.status}">${delivery.statusText}</div>
+                </div>
+            `).join('');
+        }
+
+        function getUpcomingDeliveries() {
+            const deliveries = [];
+            const today = new Date();
+            const endDate = new Date(today.getFullYear(), today.getMonth() + 3, 0); // 3 months ahead
+
+            for (let date = new Date(today); date <= endDate; date.setDate(date.getDate() + 1)) {
+                const dateStr = formatDate(date);
+                const isScheduled = isScheduledDeliveryDay(date);
+                const isCustom = customDates.has(dateStr);
+                const isSkipped = skippedDates.has(dateStr);
+
+                if ((isScheduled || isCustom) && !isSkipped && date >= today) {
+                    deliveries.push({
+                        date: date.toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            month: 'short', 
+                            day: 'numeric' 
+                        }),
+                        type: isCustom ? 'Custom delivery' : 'Scheduled delivery',
+                        status: 'confirmed',
+                        statusText: 'Confirmed'
+                    });
+                }
+
+                if (deliveries.length >= 5) break;
+            }
+
+            return deliveries;
+        }
+
+        function skipNext() {
+            const nextDelivery = getUpcomingDeliveries()[0];
+            if (nextDelivery) {
+                alert(`Next delivery on ${nextDelivery.date} has been skipped.`);
+                // In a real app, this would make an API call
+                renderCalendar();
+                updateUpcomingDeliveries();
+            }
+        }
+
+        function pauseSubscription() {
+            alert('Subscription paused. You can reactivate it anytime from your account settings.');
+        }
+
+        function saveDeliverySettings() {
+            alert(`Delivery settings saved! Your meals will arrive ${selectedFrequency} as scheduled.`);
+        }
+
+        // Initialize calendar when page loads
+        initializeCalendar();
+    </script>
+</body>
+</html>

@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customize Your Meals - FlexFeast</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        nav {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #667eea;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6rem 0 2rem;
+            text-align: center;
+            margin-top: 80px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .plan-info {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .meal-selection {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .meal-counter {
+            font-size: 1rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .filters {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .preset-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #28a745;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .preset-btn:hover {
+            border-color: #28a745;
+            background: #28a745;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .presets {
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .meals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .meal-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .meal-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            border-color: #667eea;
+        }
+
+        .meal-card.selected {
+            border-color: #667eea;
+            background: #f8f9ff;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .meal-card.unavailable {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .meal-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 50%, #fecfef 50%, #fad0c4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            position: relative;
+        }
+
+        .dietary-badges {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        .badge {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .badge.vegetarian { background: #28a745; }
+        .badge.gluten-free { background: #ffc107; color: #333; }
+        .badge.dairy-free { background: #17a2b8; }
+
+        .selection-indicator {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .meal-card.selected .selection-indicator {
+            opacity: 1;
+        }
+
+        .meal-info {
+            padding: 1rem;
+        }
+
+        .meal-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .meal-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .meal-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .meal-calories {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .meal-rating {
+            color: #ffc107;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .order-summary {
+            padding: 1.5rem;
+        }
+
+        .weekly-preview {
+            margin: 1rem 0;
+        }
+
+        .selected-meals {
+            margin: 1rem 0;
+        }
+
+        .selected-meal {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .selected-meal:last-child {
+            border-bottom: none;
+        }
+
+        .selected-meal-info {
+            flex: 1;
+        }
+
+        .selected-meal-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .selected-meal-details {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+
+        .remove-meal {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-meal:hover {
+            background: #ffe6e6;
+        }
+
+        .plan-summary {
+            border-top: 2px solid #e9ecef;
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-total {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+            border-top: 1px solid #e9ecef;
+            padding-top: 0.5rem;
+        }
+
+        .delivery-schedule {
+            margin: 1.5rem 0;
+        }
+
+        .schedule-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .schedule-option:hover {
+            background: #f8f9fa;
+        }
+
+        .continue-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .continue-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .meals-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+
+            .filters {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">FlexFeast</div>
+            <ul class="nav-links">
+                <li><a href="flexfeast-home.html">Home</a></li>
+                <li><a href="flexfeast-plans.html">Plans</a></li>
+                <li><a href="flexfeast-customize.html" class="active">Customize</a></li>
+                <li><a href="flexfeast-calendar.html">Calendar</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="header">
+        <div class="container">
+            <div class="plan-info" id="planInfo">Family Plan - 10 meals/week</div>
+            <h1>Build Your Perfect Week</h1>
+            <p>Choose from our rotating menu of chef-crafted meals</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="dashboard">
+            <div class="meal-selection">
+                <div class="section-header">
+                    <h2 class="section-title">Available Meals</h2>
+                    <div class="meal-counter" id="mealCounter">0/10 meals selected</div>
+                </div>
+                
+                <div class="presets">
+                    <div style="margin-bottom: 1rem; padding: 0 1.5rem;">
+                        <h4 style="font-size: 1rem; color: #667eea; margin-bottom: 0.5rem;">Quick Diet Presets:</h4>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="preset-btn" data-preset="keto">🥑 Keto</button>
+                            <button class="preset-btn" data-preset="vegetarian">🌱 Vegetarian</button>
+                            <button class="preset-btn" data-preset="high-protein">💪 High Protein</button>
+                            <button class="preset-btn" data-preset="mediterranean">🫒 Mediterranean</button>
+                            <button class="preset-btn" data-preset="balanced">⚖️ Balanced</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="all">All Meals</button>
+                    <button class="filter-btn" data-filter="vegetarian">Vegetarian</button>
+                    <button class="filter-btn" data-filter="gluten-free">Gluten-Free</button>
+                    <button class="filter-btn" data-filter="dairy-free">Dairy-Free</button>
+                    <button class="filter-btn" data-filter="high-protein">High Protein</button>
+                </div>
+
+                <div class="meals-grid" id="mealsGrid">
+                    <!-- Meals will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="order-summary">
+                    <h3 class="section-title">This Week's Meals</h3>
+                    
+                    <div class="selected-meals" id="selectedMeals">
+                        <div class="empty-state">Select meals from the menu to get started</div>
+                    </div>
+
+                    <div class="plan-summary">
+                        <div class="summary-row">
+                            <span>Plan:</span>
+                            <span id="planName">Family</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Meals/week:</span>
+                            <span id="mealsPerWeek">10</span>
+                        </div>
+                        <div class="summary-row summary-total">
+                            <span>Weekly Total:</span>
+                            <span id="weeklyTotal">$79.00</span>
+                        </div>
+                    </div>
+
+                    <div class="delivery-schedule">
+                        <h4 style="margin-bottom: 1rem;">Delivery Schedule</h4>
+                        <label class="schedule-option">
+                            <input type="radio" name="schedule" value="weekly" checked>
+                            <span>Weekly (Every Monday)</span>
+                        </label>
+                        <label class="schedule-option">
+                            <input type="radio" name="schedule" value="biweekly">
+                            <span>Bi-weekly (Every Other Monday)</span>
+                        </label>
+                        <label class="schedule-option">
+                            <input type="radio" name="schedule" value="monthly">
+                            <span>Monthly (First Monday)</span>
+                        </label>
+                    </div>
+
+                    <button class="continue-btn" id="continueBtn" disabled>
+                        Select <span id="remainingMeals">10</span> More Meals
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const meals = [
+            {
+                id: 1,
+                name: "Mediterranean Salmon Bowl",
+                description: "Fresh Atlantic salmon with quinoa, roasted vegetables, and tzatziki sauce",
+                emoji: "🐟",
+                calories: "520 cal",
+                rating: "★★★★★",
+                tags: ["gluten-free", "high-protein", "dairy-free", "mediterranean", "keto"]
+            },
+            {
+                id: 2,
+                name: "Teriyaki Chicken & Rice",
+                description: "Grilled chicken breast with jasmine rice, steamed broccoli, and teriyaki glaze",
+                emoji: "🍗",
+                calories: "480 cal",
+                rating: "★★★★☆",
+                tags: ["gluten-free", "high-protein"]
+            },
+            {
+                id: 3,
+                name: "Plant-Based Power Bowl",
+                description: "Lentils, roasted sweet potato, kale, avocado, and tahini dressing",
+                emoji: "🥗",
+                calories: "420 cal",
+                rating: "★★★★★",
+                tags: ["vegetarian", "gluten-free", "dairy-free", "high-protein"]
+            },
+            {
+                id: 4,
+                name: "Beef & Mushroom Risotto",
+                description: "Tender beef strips with creamy mushroom risotto and fresh herbs",
+                emoji: "🥩",
+                calories: "590 cal",
+                rating: "★★★★☆",
+                tags: ["high-protein"]
+            },
+            {
+                id: 5,
+                name: "Thai Curry Shrimp",
+                description: "Coconut curry shrimp with jasmine rice and mixed vegetables",
+                emoji: "🍤",
+                calories: "510 cal",
+                rating: "★★★★★",
+                tags: ["gluten-free", "dairy-free", "high-protein"]
+            },
+            {
+                id: 6,
+                name: "Mexican Street Corn Bowl",
+                description: "Spiced ground turkey, corn salsa, black beans, and cilantro lime rice",
+                emoji: "🌽",
+                calories: "470 cal",
+                rating: "★★★★☆",
+                tags: ["gluten-free", "high-protein"]
+            },
+            {
+                id: 7,
+                name: "Italian Herb Pasta",
+                description: "Penne pasta with grilled chicken, sun-dried tomatoes, and pesto sauce",
+                emoji: "🍝",
+                calories: "550 cal",
+                rating: "★★★★☆",
+                tags: ["high-protein"]
+            },
+            {
+                id: 8,
+                name: "Korean BBQ Bowl",
+                description: "Marinated beef bulgogi with kimchi fried rice and sesame vegetables",
+                emoji: "🍜",
+                calories: "530 cal",
+                rating: "★★★★★",
+                tags: ["dairy-free", "high-protein"]
+            },
+            {
+                id: 9,
+                name: "Caprese Stuffed Chicken",
+                description: "Herb-crusted chicken breast stuffed with mozzarella and fresh basil",
+                emoji: "🍗",
+                calories: "460 cal",
+                rating: "★★★★☆",
+                tags: ["gluten-free", "high-protein"]
+            },
+            {
+                id: 10,
+                name: "Quinoa Buddha Bowl",
+                description: "Rainbow vegetables, edamame, avocado with ginger-sesame dressing",
+                emoji: "🥙",
+                calories: "390 cal",
+                rating: "★★★★★",
+                tags: ["vegetarian", "gluten-free", "dairy-free"]
+            },
+            {
+                id: 11,
+                name: "Honey Garlic Pork Tenderloin",
+                description: "Glazed pork with roasted root vegetables and wild rice pilaf",
+                emoji: "🥩",
+                calories: "540 cal",
+                rating: "★★★★☆",
+                tags: ["gluten-free", "dairy-free", "high-protein"]
+            },
+            {
+                id: 12,
+                name: "Mediterranean Veggie Wrap",
+                description: "Hummus, roasted vegetables, and fresh herbs in a spinach tortilla",
+                emoji: "🌯",
+                calories: "380 cal",
+                rating: "★★★★☆",
+                tags: ["vegetarian", "dairy-free"]
+            }
+        ];
+
+        const plans = {
+            starter: { name: 'Starter', meals: 6, price: 49 },
+            family: { name: 'Family', meals: 10, price: 79 },
+            feast: { name: 'Feast', meals: 15, price: 109 }
+        };
+
+        let selectedPlan = 'family';
+        let selectedMeals = new Set();
+        let currentFilter = 'all';
+
+        const dietPresets = {
+            keto: [1, 5, 8, 9, 11],
+            vegetarian: [3, 10, 12],
+            "high-protein": [1, 2, 4, 5, 6, 9],
+            mediterranean: [1, 3, 10, 12],
+            balanced: [2, 3, 6, 7, 10]
+        };
+
+        function initializePage() {
+            const savedPlan = localStorage.getItem('selectedPlan');
+            if (savedPlan && plans[savedPlan]) {
+                selectedPlan = savedPlan;
+            }
+            
+            const plan = plans[selectedPlan];
+            document.getElementById('planInfo').textContent = `${plan.name} Plan - ${plan.meals} meals/week`;
+            document.getElementById('planName').textContent = plan.name;
+            document.getElementById('mealsPerWeek').textContent = plan.meals;
+            document.getElementById('weeklyTotal').textContent = `$${plan.price}.00`;
+            
+            renderMeals();
+            updateUI();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelector('.filter-btn.active').classList.remove('active');
+                    e.target.classList.add('active');
+                    currentFilter = e.target.dataset.filter;
+                    renderMeals();
+                });
+            });
+
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const preset = e.target.dataset.preset;
+                    applyPreset(preset);
+                });
+            });
+
+            document.getElementById('continueBtn').addEventListener('click', () => {
+                if (selectedMeals.size === plans[selectedPlan].meals) {
+                    const schedule = document.querySelector('input[name="schedule"]:checked').value;
+                    window.location.href = 'flexfeast-calendar.html';
+                }
+            });
+        }
+
+        function applyPreset(presetName) {
+            selectedMeals.clear();
+            const maxMeals = plans[selectedPlan].meals;
+            const presetMeals = dietPresets[presetName] || [];
+            
+            // Add preset meals up to the plan limit
+            for (let i = 0; i < Math.min(presetMeals.length, maxMeals); i++) {
+                selectedMeals.add(presetMeals[i]);
+            }
+            
+            // If we need more meals, fill randomly from remaining suitable meals
+            if (selectedMeals.size < maxMeals) {
+                const suitableMeals = meals.filter(meal => 
+                    !selectedMeals.has(meal.id) && 
+                    (presetName === 'balanced' || meal.tags.includes(presetName))
+                );
+                
+                while (selectedMeals.size < maxMeals && suitableMeals.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * suitableMeals.length);
+                    const meal = suitableMeals.splice(randomIndex, 1)[0];
+                    selectedMeals.add(meal.id);
+                }
+            }
+            
+            renderMeals();
+            updateUI();
+        }
+
+        function renderMeals() {
+            const mealsGrid = document.getElementById('mealsGrid');
+            mealsGrid.innerHTML = '';
+
+            const filteredMeals = meals.filter(meal => {
+                if (currentFilter === 'all') return true;
+                return meal.tags.includes(currentFilter);
+            });
+
+            filteredMeals.forEach(meal => {
+                const isSelected = selectedMeals.has(meal.id);
+                const mealCard = document.createElement('div');
+                mealCard.className = `meal-card ${isSelected ? 'selected' : ''}`;
+                mealCard.innerHTML = `
+                    <div class="meal-image">
+                        ${meal.emoji}
+                        <div class="dietary-badges">
+                            ${meal.tags.includes('vegetarian') ? '<span class="badge vegetarian">Vegetarian</span>' : ''}
+                            ${meal.tags.includes('gluten-free') ? '<span class="badge gluten-free">Gluten-Free</span>' : ''}
+                            ${meal.tags.includes('dairy-free') ? '<span class="badge dairy-free">Dairy-Free</span>' : ''}
+                        </div>
+                        <div class="selection-indicator">✓</div>
+                    </div>
+                    <div class="meal-info">
+                        <div class="meal-name">${meal.name}</div>
+                        <div class="meal-description">${meal.description}</div>
+                        <div class="meal-meta">
+                            <span class="meal-calories">${meal.calories}</span>
+                            <span class="meal-rating">${meal.rating}</span>
+                        </div>
+                    </div>
+                `;
+
+                mealCard.addEventListener('click', () => toggleMeal(meal.id));
+                mealsGrid.appendChild(mealCard);
+            });
+        }
+
+        function toggleMeal(mealId) {
+            const maxMeals = plans[selectedPlan].meals;
+            
+            if (selectedMeals.has(mealId)) {
+                selectedMeals.delete(mealId);
+            } else if (selectedMeals.size < maxMeals) {
+                selectedMeals.add(mealId);
+            }
+            
+            renderMeals();
+            updateUI();
+        }
+
+        function updateUI() {
+            const maxMeals = plans[selectedPlan].meals;
+            const selectedCount = selectedMeals.size;
+            const remaining = maxMeals - selectedCount;
+
+            document.getElementById('mealCounter').textContent = `${selectedCount}/${maxMeals} meals selected`;
+            document.getElementById('remainingMeals').textContent = remaining;
+
+            const selectedMealsContainer = document.getElementById('selectedMeals');
+            const continueBtn = document.getElementById('continueBtn');
+
+            if (selectedCount === 0) {
+                selectedMealsContainer.innerHTML = '<div class="empty-state">Select meals from the menu to get started</div>';
+            } else {
+                let summaryHTML = '';
+                Array.from(selectedMeals).forEach(mealId => {
+                    const meal = meals.find(m => m.id === mealId);
+                    summaryHTML += `
+                        <div class="selected-meal">
+                            <div class="selected-meal-info">
+                                <div class="selected-meal-name">${meal.name}</div>
+                                <div class="selected-meal-details">${meal.calories} • ${meal.rating}</div>
+                            </div>
+                            <button class="remove-meal" onclick="toggleMeal(${meal.id})" title="Remove meal">×</button>
+                        </div>
+                    `;
+                });
+                selectedMealsContainer.innerHTML = summaryHTML;
+            }
+
+            if (selectedCount === maxMeals) {
+                continueBtn.disabled = false;
+                continueBtn.textContent = 'Continue to Checkout';
+            } else {
+                continueBtn.disabled = true;
+                continueBtn.textContent = `Select ${remaining} More Meal${remaining !== 1 ? 's' : ''}`;
+            }
+        }
+
+        initializePage();
+    </script>
+</body>
+</html>
